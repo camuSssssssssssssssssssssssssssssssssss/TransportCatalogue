@@ -6,3 +6,5 @@
 
 /*input_reader.h, input_reader.cpp — чтение запросов на заполнение базы;*/
 
+void FillTransportCatalogue(std::ifstream& in, TransportCatalogue& catalogue);
+
