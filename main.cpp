@@ -1,9 +1,11 @@
 #include <iostream>
-#include "transport_catalogue.h"
+#include "input_reader.h"
+#include "stat_reader.h"
+
 
 // main.cpp — точка входа.
 int main(){
-
+    TransportCatalogue tr_ct;
 }
 
 
