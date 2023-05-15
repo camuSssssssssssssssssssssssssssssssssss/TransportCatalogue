@@ -6,5 +6,6 @@
 
 /*input_reader.h, input_reader.cpp — чтение запросов на заполнение базы;*/
 
-void FillTransportCatalogue(std::istream& in, TransportCatalogue& catalogue);
+void CatalogueFill(std::istream& in, TransportCatalogue catalogue);
+std::pair<std::vector<std::string>, bool> RouteFill(std::string& line);
 
