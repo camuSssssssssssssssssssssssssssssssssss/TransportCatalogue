@@ -1,5 +1,5 @@
 #include "input_reader.h"
 
-void FillTransportCatalogue(std::ifstream& in, TransportCatalogue catalogue){
+void FillTransportCatalogue(std::istream& in, TransportCatalogue catalogue){
     
 }
