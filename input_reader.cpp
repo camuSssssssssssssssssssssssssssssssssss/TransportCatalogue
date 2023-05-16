@@ -1,53 +1,43 @@
 #include "input_reader.h"
 
-void CatalogueFill(std::istream& in, TransportCatalogue catalogue) {
-	size_t count;										//количество запросов
-	in >> count;
-	for (size_t i = 0; i <= count; ++i) {
-		std::string line, key;
+void FillCatalogue(std::istream& in, TransportCatalogue& catalogue) {
+	size_t requests_count;
+	in >> requests_count;
+	for (size_t i = 0; i < requests_count; ++i) {
+		std::string keyword, line;
+		in >> keyword;
 		std::getline(in, line);
-		key = line.substr(0, line.find(' '));
-		if (key == "Stop") {
-			std::string stop_name = line.substr(line.find(' ') + 1, line.find_first_of(':') - line.find(' ') - 2);			//поиск имени остановки
-			std::string latandlong = line.substr(line.find(':') + 1);								//значения Х и Y
-			double latitude = std::stod(latandlong.substr(latandlong.find_first_of(" "), latandlong.find_first_of(",")));		//значение X
-			double longitude = std::stod(latandlong.substr(latandlong.find_first_of(",") + 1, latandlong.find_last_of(" ")));	//значение Y
-			Coordinates coord = { latitude, longitude };										//добавление в координаты
-			catalogue.AddStop(stop_name, coord);											//добавление остановки
+		if (keyword == "Stop") {
+			std::string stop_name = line.substr(1, line.find_first_of(':') - line.find_first_of(' ') - 1);
+			double lat = std::stod(line.substr(line.find_first_of(':') + 2, 9));
+			double lng = std::stod(line.substr(line.find_first_of(',') + 2, 9));
+			Coordinates stop_coordinates = { lat, lng };
+			catalogue.AddStop(stop_name, stop_coordinates);
 		}
-
-		else if (key == "Bus") {
-			std::string bus_number = line.substr(line.find(' ') + 1, line.find_first_of(':') - line.find(' ') - 1);			//номер автобуса
-			auto [stop_route, circular_r] = RouteFill(line);									//название остановок маршрута и тип маршрута
-			catalogue.AddBus(bus_number,stop_route,circular_r);									//добавляю маршрут
+		else if (keyword == "Bus") {
+			std::string route_number = line.substr(1, line.find_first_of(':') - 1);
+			line.erase(0, line.find_first_of(':') + 2);
+			auto [route_stops, circular_route] = FillRoute(line);
+			catalogue.AddRoute(route_number, route_stops, circular_route);
+			route_stops.clear();
 		}
 	}
 }
 
 
-std::pair<std::vector<std::string>, bool> RouteFill(std::string& line) {									//заполняю маршрут
-	std::vector<std::string> route_stops;																			
-	bool circular_route = false;														//если нет '>', то false
-
+std::pair<std::vector<std::string>, bool> FillRoute(std::string& line) {
+	std::vector<std::string> route_stops;
+	bool circular_route = false;
 	std::string stop_name;
-	std::size_t pos = 0;
-	while (pos < line.length()) {
-		std::size_t next_pos = line.find_first_of("->", pos);		/*В каждой итерации цикла происходит поиск следующего вхождения разделителя -> в строке с помощью функции find_first_of. 
-										Если вхождение найдено, то извлекается подстрока между текущей позицией pos и найденным вхождением next_pos.
-										Эта подстрока представляет собой отдельную остановку в маршруте, которая добавляется в вектор route_stops.*/
-		if (next_pos == std::string::npos) {				/*Затем значение переменной pos обновляется,
-										чтобы указывать на позицию после найденного вхождения разделителя ->, 
-										и цикл переходит к следующей итерации для поиска следующей остановки.*/
-			stop_name = line.substr(pos);
-			route_stops.push_back(stop_name);
-			break;
-		}
-		stop_name = line.substr(pos, next_pos - pos);
+	auto pos = line.find('>') != line.npos ? '>' : '-';
+	while (line.find(pos) != line.npos) {
+		stop_name = line.substr(0, line.find_first_of(pos) - 1);
 		route_stops.push_back(stop_name);
-		pos = next_pos + 2;
+		line.erase(0, line.find_first_of(pos) + 2);
 	}
-
-	circular_route = line.find(">") != std::string::npos;
+	stop_name = line.substr(0, line.npos - 1);
+	route_stops.push_back(stop_name);
+	if (pos == '>') circular_route = true;
 
 	return std::make_pair(route_stops, circular_route);
 }
