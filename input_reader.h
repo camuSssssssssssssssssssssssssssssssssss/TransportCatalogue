@@ -3,9 +3,12 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
 
 /*input_reader.h, input_reader.cpp — чтение запросов на заполнение базы;*/
 
-void CatalogueFill(std::istream& in, TransportCatalogue catalogue);
-std::pair<std::vector<std::string>, bool> RouteFill(std::string& line);
+void FillCatalogue(std::istream& in, TransportCatalogue& catalogue);
+
+std::pair<std::vector<std::string>, bool> FillRoute(std::string& line);
+
 
