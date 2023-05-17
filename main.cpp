@@ -5,9 +5,8 @@
 int main() {
     TransportCatalogue catalogue;
     FillCatalogue(std::cin, catalogue);
-    ProcessRequests(catalogue);
+    OutTransport(catalogue);
 }
-
 
 
 
