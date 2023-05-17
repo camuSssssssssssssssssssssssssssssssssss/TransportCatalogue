@@ -51,16 +51,14 @@ const RouteInfo TransportCatalogue::BusRouteInformation(const std::string& route
     }
 
     double length = 0.0;
-    for (size_t i = 1; i < bus->stops.size(); ++i) {
-        
+    for (size_t i = 1; i < bus->stops.size(); ++i){
         length += ComputeDistance(finderstop_.at(find_->second->stops[i - 1])->coordinates, finderstop_.at(find_->second->stops[i])->coordinates); //bug
-        if (find_->second->circular_route != true) {
+    }
+    if (find_->second->circular_route != true) {
             length *= 2;
-        }
     }
 
     info.unique_stops_count = UniqueStopsCount(route_number);
-    
     info.route_length = length;
 
     return info;
