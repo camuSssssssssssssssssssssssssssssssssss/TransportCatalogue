@@ -11,4 +11,3 @@ void FillCatalogue(std::istream& in, TransportCatalogue& catalogue);
 
 std::pair<std::vector<std::string>, bool> FillRoute(std::string& line);
 
-
