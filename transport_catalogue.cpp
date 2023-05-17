@@ -11,7 +11,7 @@ void TransportCatalogue::AddStop(const std::string& stop_name, Coordinates& coor
 }
 
 const Bus* TransportCatalogue::FindRoute(const std::string& route_number) const {
-    if (!finderbus_.count(route_number)) {
+    if (finderbus_.count(route_number)) {
         return finderbus_.at(route_number);
     }
     else
@@ -20,7 +20,7 @@ const Bus* TransportCatalogue::FindRoute(const std::string& route_number) const 
 }
 
 const Stop* TransportCatalogue::FindStop(const std::string& stop_name) const {
-    if (!finderstop_.count(stop_name)) {
+    if (finderstop_.count(stop_name)) {
         return finderstop_.at(stop_name);
     }
     else
