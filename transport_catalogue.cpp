@@ -26,24 +26,21 @@ const Stop* TransportCatalogue::FindStop(const std::string& stop_name) const {
 
 const RouteInfo TransportCatalogue::RouteInformation(const std::string& route_number) const {
     RouteInfo info;
-    auto count = info.stops_count;
-    auto length = info.route_length;
     auto bus = FindRoute(route_number);
     if (bus->circular_route) {
-        count = bus->stops.size();
-        info.stops_count
+        info.stops_count = bus->stops.size();
     }
     else {
-        count = bus->stops.size() * 2 - 1;
+        info.stops_count = bus->stops.size() * 2 - 1;
     }
 
     for (size_t i = 1; i < bus->stops.size(); ++i) {
-
+        info.route_length += ComputeDistance(finderstop_.at(route_number)[i - 1].coordinates, finderstop_.at(route_number)[i].coordinates);
     }
-    info.route_length =
-    info.stops_count = count;
+    if (bus->circular_route == true) {
+        info.route_length *= 2;
+    }
     info.unique_stops_count = UniqueStopsCount(route_number);
-
     return info;
 
     /*Bus 256: 6 stops on route, 5 unique stops, 4371.02 route length
@@ -58,5 +55,8 @@ size_t TransportCatalogue::UniqueStopsCount(const std::string& route_number) con
     }
     return unique.size();
 }
+
+
+
 
 
