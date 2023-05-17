@@ -6,6 +6,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <optional>
 #include <stdexcept>
 #include <unordered_set>
 
@@ -23,7 +24,7 @@ struct Stop {
 struct RouteInfo {
     size_t stops_count;
     size_t unique_stops_count;
-    double route_length{0.0};
+    double route_length;
 };
 
 class TransportCatalogue {
