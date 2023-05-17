@@ -1,16 +1,21 @@
 #include "transport_catalogue.h"
+#include <iostream>
 
-void TransportCatalogue::AddRoute(const std::string& route_number, const std::vector<std::string>& route_stops, bool circular_route) {
+void TransportCatalogue::AddBusRoute(const std::string& route_number, const std::vector<std::string>& route_stops, bool circular_route) {
+
     buses_.push_back({ route_number, route_stops, circular_route });
-    finderbus_[buses_.back().number] = &buses_.back();
+    std::string_view a = buses_.back().number;
+    finderbus_[a] = &buses_.back();
 }
 
-void TransportCatalogue::AddStop(const std::string& stop_name, Coordinates& coordinates) {
+void TransportCatalogue::AddBusStop(const std::string& stop_name, Coordinates& coordinates) {
+
     stops_.push_back({ stop_name, coordinates });
-    finderstop_[stops_.back().name] = &stops_.back();
+    std::string_view b = stops_.back().name;
+    finderstop_[b] = &stops_.back();
 }
 
-const Bus* TransportCatalogue::FindRoute(const std::string& route_number) const {
+const Bus* TransportCatalogue::FindBusRoute(const std::string& route_number) const {
     if (finderbus_.count(route_number)) {
         return finderbus_.at(route_number);
     }
@@ -19,7 +24,7 @@ const Bus* TransportCatalogue::FindRoute(const std::string& route_number) const 
 
 }
 
-const Stop* TransportCatalogue::FindStop(const std::string& stop_name) const {
+const Stop* TransportCatalogue::FindBusStop(const std::string& stop_name) const {
     if (finderstop_.count(stop_name)) {
         return finderstop_.at(stop_name);
     }
@@ -30,12 +35,14 @@ const Stop* TransportCatalogue::FindStop(const std::string& stop_name) const {
 // КОД ВЫШЕ РАБОТАЕТ
 
 
-const RouteInfo TransportCatalogue::RouteInformation(const std::string& route_number) const {
-     
+const RouteInfo TransportCatalogue::BusRouteInformation(const std::string& route_number) const {
+
     RouteInfo info{};
     auto find_ = finderbus_.find(route_number);
 
-    auto bus = FindRoute(route_number);
+    auto bus = FindBusRoute(route_number);
+    if (!bus) { std::cout << "notFound"; return { 0,0,0 }; }
+
     if (bus->circular_route) {
         info.stops_count = bus->stops.size();
     }
@@ -45,20 +52,18 @@ const RouteInfo TransportCatalogue::RouteInformation(const std::string& route_nu
 
     double length = 0.0;
     for (size_t i = 1; i < bus->stops.size(); ++i) {
+        
         length += ComputeDistance(finderstop_.at(find_->second->stops[i - 1])->coordinates, finderstop_.at(find_->second->stops[i])->coordinates); //bug
-        if (bus->circular_route == true) {
+        if (find_->second->circular_route != true) {
             length *= 2;
         }
     }
-    
-    info.unique_stops_count = UniqueStopsCount(route_number);
-    info.route_length = length;
-    
-    return info;
 
-    /*Bus 256: 6 stops on route, 5 unique stops, 4371.02 route length
-          Bus 750 : 5 stops on route, 3 unique stops, 20939.5 route length
-          Bus 751 : not found*/
+    info.unique_stops_count = UniqueStopsCount(route_number);
+    
+    info.route_length = length;
+
+    return info;
 }
 
 size_t TransportCatalogue::UniqueStopsCount(const std::string& route_number) const {
@@ -68,7 +73,6 @@ size_t TransportCatalogue::UniqueStopsCount(const std::string& route_number) con
     }
     return unique.size();
 }
-
 
 
 
