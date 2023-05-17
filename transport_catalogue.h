@@ -23,7 +23,7 @@ struct Stop {
 struct RouteInfo {
     size_t stops_count;
     size_t unique_stops_count;
-    double route_length;
+    double route_length{0.0};
 };
 
 class TransportCatalogue {
