@@ -36,9 +36,6 @@ const RouteInfo TransportCatalogue::RouteInformation(const std::string& route_nu
     auto find_ = finderbus_.find(route_number);
 
     auto bus = FindRoute(route_number);
-    if (!bus) 
-        throw std::invalid_argument("bus not found");
-
     if (bus->circular_route) {
         info.stops_count = bus->stops.size();
     }
