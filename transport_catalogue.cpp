@@ -1,18 +1,17 @@
 #include "transport_catalogue.h"
-#include <iostream>
 
 void TransportCatalogue::AddBusRoute(const std::string& route_number, const std::vector<std::string>& route_stops, bool circular_route) {
-
     buses_.push_back({ route_number, route_stops, circular_route });
-    std::string_view a = buses_.back().number;
-    finderbus_[a] = &buses_.back();
+    finderbus_[buses_.back().number] = &buses_.back();
+    for (const auto& stop : buses_.back().stops) {
+        bustoforstop[stop].insert(route_number);
+    }
+
 }
 
 void TransportCatalogue::AddBusStop(const std::string& stop_name, Coordinates& coordinates) {
-
     stops_.push_back({ stop_name, coordinates });
-    std::string_view b = stops_.back().name;
-    finderstop_[b] = &stops_.back();
+    finderstop_[stops_.back().name] = &stops_.back();
 }
 
 const Bus* TransportCatalogue::FindBusRoute(const std::string& route_number) const {
@@ -21,7 +20,6 @@ const Bus* TransportCatalogue::FindBusRoute(const std::string& route_number) con
     }
     else
         return nullptr;
-
 }
 
 const Stop* TransportCatalogue::FindBusStop(const std::string& stop_name) const {
@@ -32,9 +30,6 @@ const Stop* TransportCatalogue::FindBusStop(const std::string& stop_name) const 
         return nullptr;
 }
 
-// КОД ВЫШЕ РАБОТАЕТ
-
-
 const RouteInfo TransportCatalogue::BusRouteInformation(const std::string& route_number) const {
 
     RouteInfo info{};
@@ -42,7 +37,7 @@ const RouteInfo TransportCatalogue::BusRouteInformation(const std::string& route
 
     auto bus = FindBusRoute(route_number);
     if (!bus) { std::cout << "notFound"; return { 0,0,0 }; }
-
+   
     if (bus->circular_route) {
         info.stops_count = bus->stops.size();
     }
@@ -51,16 +46,16 @@ const RouteInfo TransportCatalogue::BusRouteInformation(const std::string& route
     }
 
     double length = 0.0;
-    for (size_t i = 1; i < bus->stops.size(); ++i){
-        length += ComputeDistance(finderstop_.at(find_->second->stops[i - 1])->coordinates, finderstop_.at(find_->second->stops[i])->coordinates); //bug
+    for (size_t i = 1; i < bus->stops.size(); ++i) {
+        length += ComputeDistance(finderstop_.at(find_->second->stops[i - 1])->coordinates, finderstop_.at(find_->second->stops[i])->coordinates);
     }
-    if (find_->second->circular_route != true) {
-            length *= 2;
+    if (bus->circular_route != true) {
+        length *= 2;
     }
+
 
     info.unique_stops_count = UniqueStopsCount(route_number);
     info.route_length = length;
-
     return info;
 }
 
@@ -71,6 +66,15 @@ size_t TransportCatalogue::UniqueStopsCount(const std::string& route_number) con
     }
     return unique.size();
 }
+
+std::set<std::string>TransportCatalogue::BusToStop(const std::string& stop_name) const{
+    if (bustoforstop.count(stop_name)) {
+        return bustoforstop.at(stop_name);
+    }
+    return {};
+    
+}
+
 
 
 
