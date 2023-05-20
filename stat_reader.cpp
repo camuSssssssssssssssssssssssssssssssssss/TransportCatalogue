@@ -35,9 +35,6 @@ void OutTransport(TransportCatalogue& catalogue) {
                     std::cout << std::endl;
                 }
             }
-
         }
-        
     }
-    
 }
