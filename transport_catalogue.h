@@ -21,12 +21,14 @@ struct Bus {
 struct Stop {
     std::string name;
     Coordinates coordinates;
+    
 };
 
 struct RouteInfo {
     size_t stops_count;
     size_t unique_stops_count;
     double route_length;
+    double curvature;
 };
 
 class TransportCatalogue {
@@ -38,35 +40,15 @@ public:
     const RouteInfo BusRouteInformation(const std::string& route_number) const;
     size_t UniqueStopsCount(const std::string& route_number) const;
     std::set<std::string>BusToStop(const std::string& stop_name) const;
+    void SetStopDistance(Stop* from, Stop* to, int distance);
+    int GetStopDistance(const Stop* from, const Stop* to) const;
 
 private:
     std::deque<Bus> buses_;
     std::deque<Stop> stops_;
     std::unordered_map<std::string_view, const Bus*> finderbus_;
     std::unordered_map<std::string_view, const Stop*> finderstop_;
-    std::unordered_map<std::string, std::set<std::string>>bustoforstop;
-    
+    std::unordered_map<std::string, std::set<std::string>> bustoforstop;
+    std::unordered_map<std::string, int> stop_distances_;
 
-        /*
-        
-        Bus 256
-        Bus 750
-        Bus 751
-
-        Stop Samara
-        Stop Prazhskaya
-        Stop Biryulyovo Zapadnoye
-        
-        */
-  
-    /*
-    Bus 256: 6 stops on route, 5 unique stops, 4371.02 route length
-    Bus 750: 5 stops on route, 3 unique stops, 20939.5 route length
-    Bus 751: not found
-
-    Stop Samara : not found
-    Stop Prazhskaya : no buses
-    Stop Biryulyovo Zapadnoye : buses 256 828
-    
-    */
 };
