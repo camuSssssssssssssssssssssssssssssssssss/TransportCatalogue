@@ -1,29 +1,48 @@
 #include "input_reader.h"
 
-void FillCatalogue(std::istream& in, TransportCatalogue& catalogue) {
+void FillCatalogue(TransportCatalogue& catalogue) {
 	size_t requests_count;
-	in >> requests_count;
+	std::cin >> requests_count;
 	for (size_t i = 0; i < requests_count; ++i) {
 		std::string keyword, line;
-		in >> keyword;
-		std::getline(in, line);
+		std::cin >> keyword;
+
 		if (keyword == "Stop") {
-			std::string stop_name = line.substr(1, line.find_first_of(':') - line.find_first_of(' ') - 1);
-			double lat = std::stod(line.substr(line.find_first_of(':') + 2));
-			double lng = std::stod(line.substr(line.find_first_of(',') + 2));
-			Coordinates stop_coordinates = { lat, lng };
-			catalogue.AddBusStop(stop_name, stop_coordinates);
+			std::getline(std::cin, line);
+			ParseStop(catalogue, line);
 		}
 		else if (keyword == "Bus") {
-			std::string route_number = line.substr(1, line.find_first_of(':') - 1);
-			line.erase(0, line.find_first_of(':') + 2);
-			auto [route_stops, circular_route] = FillRoute(line);
-			catalogue.AddBusRoute(route_number, route_stops, circular_route);
-			route_stops.clear();
+			std::getline(std::cin, line);
+			ParseBus(catalogue, line);
 		}
 	}
 }
 
+void ParseStop(TransportCatalogue& catalogue, std::string line) {
+    std::unordered_map<std::string, int> distance_;
+
+    std::string stop_name = line.substr(1, line.find_first_of(':') - line.find_first_of(' ') - 1);
+
+    double lat = std::stod(line.substr(line.find_first_of(':') + 2));
+    double lng = std::stod(line.substr(line.find_first_of(',') + 2));
+    Coordinates stop_coordinates = { lat, lng };
+
+    // Извлекаем информацию о расстояниях
+
+	
+	
+}
+
+void ParseBus(TransportCatalogue& catalogue, std::string line) {
+	std::string route_number = line.substr(1, line.find_first_of(':') - 1);
+	auto stopdata = line.substr(line.find(':') + 2);
+
+	line.erase(0, line.find_first_of(':') + 2);
+	auto [route_stops, circular_route] = FillRoute(line);
+	catalogue.AddBusRoute(route_number, route_stops, circular_route);
+	route_stops.clear();
+	
+}
 
 std::pair<std::vector<std::string>, bool> FillRoute(std::string& line) {
 	std::vector<std::string> stops;
@@ -41,3 +60,4 @@ std::pair<std::vector<std::string>, bool> FillRoute(std::string& line) {
 
 	return std::make_pair(stops, circular_route);
 }
+
