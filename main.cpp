@@ -4,11 +4,9 @@
 // main.cpp — точка входа.
 int main() {
     TransportCatalogue catalogue;
-    FillCatalogue(std::cin, catalogue);
+    FillCatalogue(catalogue);
     OutTransport(catalogue);
 }
-
-
 
 
 
