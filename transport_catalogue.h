@@ -9,6 +9,8 @@
 #include <vector>
 #include <stdexcept>
 #include <set>
+#include <map>
+#include <functional>
 #include <unordered_set>
 
 
@@ -18,10 +20,11 @@ struct Bus {
     bool circular_route;
 };
 
+
 struct Stop {
     std::string name;
     Coordinates coordinates;
-    
+    std::unordered_map<std::string, int> stop_distances;
 };
 
 struct RouteInfo {
@@ -31,12 +34,13 @@ struct RouteInfo {
     double curvature;
 };
 
+
 class TransportCatalogue {
 public:
-    void AddBusRoute(const std::string& route_number, const std::vector<std::string>& route_stops, bool circular_route);
-    void AddBusStop(const std::string& stop_name, Coordinates& coordinates);
+    void AddBusRoute(Bus&);
+    void AddBusStop(Stop&);
     const Bus* FindBusRoute(const std::string& route_number) const;
-    const Stop* FindBusStop(const std::string& stop_name) const;
+    Stop* FindBusStop(const std::string& stop_name) const;
     const RouteInfo BusRouteInformation(const std::string& route_number) const;
     size_t UniqueStopsCount(const std::string& route_number) const;
     std::set<std::string>BusToStop(const std::string& stop_name) const;
@@ -47,8 +51,6 @@ private:
     std::deque<Bus> buses_;
     std::deque<Stop> stops_;
     std::unordered_map<std::string_view, const Bus*> finderbus_;
-    std::unordered_map<std::string_view, const Stop*> finderstop_;
-    std::unordered_map<std::string, std::set<std::string>> bustoforstop;
-    std::unordered_map<std::string, int> stop_distances_;
-
+    std::unordered_map<std::string_view, Stop*> finderstop_;
+    std::unordered_map<std::string, std::set<std::string>> bustoforstop_;
 };
