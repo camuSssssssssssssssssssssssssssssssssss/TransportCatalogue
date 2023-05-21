@@ -52,23 +52,24 @@ const RouteInfo TransportCatalogue::BusRouteInformation(const std::string& route
 
 
     for (size_t i = 1; i < bus->stops.size(); ++i) {
-        length += ComputeDistance(finderstop_.at(find_->second->stops[i - 1])->coordinates, finderstop_.at(find_->second->stops[i])->coordinates);
+
+        geo_length += ComputeDistance(finderstop_.at(find_->second->stops[i - 1])->coordinates, finderstop_.at(find_->second->stops[i])->coordinates);
         if (bus->circular_route != true) {
-            geo_length += GetStopDistance(finderstop_.at(find_->second->stops[i - 1]), finderstop_.at(find_->second->stops[i])) +
+            length += GetStopDistance(finderstop_.at(find_->second->stops[i - 1]), finderstop_.at(find_->second->stops[i])) +
                 GetStopDistance(finderstop_.at(find_->second->stops[i]), finderstop_.at(find_->second->stops[i - 1]));
         }
         else {
-            GetStopDistance(finderstop_.at(find_->second->stops[i - 1]), finderstop_.at(find_->second->stops[i]));
+            length+= GetStopDistance(finderstop_.at(find_->second->stops[i - 1]), finderstop_.at(find_->second->stops[i]));
         }
         
     }
     if (bus->circular_route != true) {
-        length *= 2;
+        geo_length *= 2;
     }
 
     info.unique_stops_count = UniqueStopsCount(route_number);
     info.route_length = length;
-    info.curvature = geo_length;
+    info.curvature = length/geo_length;
     return info;
 }
 
