@@ -3,12 +3,7 @@
 
 // main.cpp — точка входа.
 int main() {
-    TransportCatalogue catalogue;
-    FillCatalogue(catalogue);
-    OutTransport(catalogue);
+    infocatalogueclass::TransportCatalogue catalogue;
+    fill::TransportCatalogue(std::cin, catalogue);
+    out::Transport(catalogue, std::cin);
 }
-
-
-
-
-
