@@ -7,9 +7,10 @@
 
 /*input_reader.h, input_reader.cpp — чтение запросов на заполнение базы;*/
 
-void FillTransportCatalogue(TransportCatalogue&);
+namespace fill {
 
-Bus ParseBus(std::string&);
-Stop ParseStop(std::string& line);
-void AddStopDistances(std::string& line, TransportCatalogue& catalogue);
-
+	void TransportCatalogue(std::istream& in, infocatalogueclass::TransportCatalogue&);
+	infostruct::Bus ParseBus(std::string&);
+	infostruct::Stop ParseStop(std::string&);
+	void AddStopDistances(std::string&, infocatalogueclass::TransportCatalogue&);
+}
