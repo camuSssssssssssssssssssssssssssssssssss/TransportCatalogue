@@ -1,20 +1,20 @@
 #include "transport_catalogue.h"
 
-void TransportCatalogue::AddBusRoute(Bus& businfo) {
+void infocatalogueclass::TransportCatalogue::AddBusRoute(const infostruct::Bus& businfo) {
     buses_.push_back(businfo);
     finderbus_[buses_.back().number] = &buses_.back();
-    for (const auto& stop : buses_.back().stops) {
-        bustoforstop_[stop].insert(businfo.number);
-    }
 
+    for (const auto& inf : buses_.back().stops) {
+        bustoforstop_[inf].insert(businfo.number);
+    }
 }
 
-void TransportCatalogue::AddBusStop(Stop& stopinfo) {
+void infocatalogueclass::TransportCatalogue::AddBusStop(const infostruct::Stop& stopinfo) {
     stops_.push_back(stopinfo);
     finderstop_[stops_.back().name] = &stops_.back();
 }
 
-const Bus* TransportCatalogue::FindBusRoute(const std::string& route_number) const {
+const infostruct::Bus* infocatalogueclass::TransportCatalogue::FindBusRoute(const std::string& route_number) const {
     if (finderbus_.count(route_number)) {
         return finderbus_.at(route_number);
     }
@@ -22,7 +22,7 @@ const Bus* TransportCatalogue::FindBusRoute(const std::string& route_number) con
         return nullptr;
 }
 
-Stop* TransportCatalogue::FindBusStop(const std::string& stop_name) const {
+infostruct::Stop* infocatalogueclass::TransportCatalogue::FindBusStop(const std::string& stop_name) const {
     if (finderstop_.count(stop_name)) {
         return finderstop_.at(stop_name);
     }
@@ -30,9 +30,9 @@ Stop* TransportCatalogue::FindBusStop(const std::string& stop_name) const {
         return nullptr;
 }
 
-const RouteInfo TransportCatalogue::BusRouteInformation(const std::string& route_number) const {
+const infostruct::RouteInfo infocatalogueclass::TransportCatalogue::BusRouteInformation(const std::string& route_number) const {
 
-    RouteInfo info{};
+    infostruct::RouteInfo info{};
     auto find_ = finderbus_.find(route_number);
 
     auto bus = FindBusRoute(route_number);
@@ -47,13 +47,13 @@ const RouteInfo TransportCatalogue::BusRouteInformation(const std::string& route
         info.stops_count = bus->stops.size() * 2 - 1;
     }
 
-    double length = 0.0;
+    double length = 0.0; 
     double geo_length = 0.0;
 
 
     for (size_t i = 1; i < bus->stops.size(); ++i) {
 
-        geo_length += ComputeDistance(finderstop_.at(find_->second->stops[i - 1])->coordinates, finderstop_.at(find_->second->stops[i])->coordinates);
+        geo_length += coordinate::ComputeDistance(finderstop_.at(find_->second->stops[i - 1])->coordinates, finderstop_.at(find_->second->stops[i])->coordinates);
         if (bus->circular_route != true) {
             length += GetStopDistance(finderstop_.at(find_->second->stops[i - 1]), finderstop_.at(find_->second->stops[i])) +
                 GetStopDistance(finderstop_.at(find_->second->stops[i]), finderstop_.at(find_->second->stops[i - 1]));
@@ -73,7 +73,7 @@ const RouteInfo TransportCatalogue::BusRouteInformation(const std::string& route
     return info;
 }
 
-size_t TransportCatalogue::UniqueStopsCount(const std::string& route_number) const {
+size_t infocatalogueclass::TransportCatalogue::UniqueStopsCount(const std::string& route_number) const {
     std::unordered_set<std::string>unique;
     for (const auto& stop : finderbus_.at(route_number)->stops) {
         unique.insert(stop);
@@ -81,19 +81,18 @@ size_t TransportCatalogue::UniqueStopsCount(const std::string& route_number) con
     return unique.size();
 }
 
-std::set<std::string>TransportCatalogue::BusToStop(const std::string& stop_name) const {
+std::set<std::string>infocatalogueclass::TransportCatalogue::BusToStop(const std::string& stop_name) const {
     if (bustoforstop_.count(stop_name)) {
         return bustoforstop_.at(stop_name);
     }
     return {};
 }
 
-
-void TransportCatalogue::SetStopDistance(Stop* from, Stop* to, int dist){
+void infocatalogueclass::TransportCatalogue::SetStopDistance(infostruct::Stop* from, infostruct::Stop* to, int dist){
     from->stop_distances[to->name] = dist;
 }
 
-int TransportCatalogue::GetStopDistance(const Stop* f, const Stop* t) const{
+int infocatalogueclass::TransportCatalogue::GetStopDistance(const infostruct::Stop* f, const infostruct::Stop* t) const{
     if (f->stop_distances.count(t->name)) {
         return f->stop_distances.at(t->name);
     }   
@@ -104,6 +103,3 @@ int TransportCatalogue::GetStopDistance(const Stop* f, const Stop* t) const{
         return 0;
     }     
 }
-
-
-
