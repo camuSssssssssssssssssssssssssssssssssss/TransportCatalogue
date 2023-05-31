@@ -10,50 +10,49 @@
 #include <stdexcept>
 #include <set>
 #include <map>
-#include <functional>
 #include <unordered_set>
-
-namespace infostruct {
-    struct Bus {
-        std::string number;
-        std::vector<std::string> stops;
-        bool circular_route;
-    };
+#include <functional>
+#include "domain.h"
+#include "geo.h"
 
 
-    struct Stop {
-        std::string name;
-        coordinate::Coordinates coordinates;
-        std::unordered_map<std::string, int> stop_distances;
-    };
-
-    struct RouteInfo {
-        size_t stops_count;
-        size_t unique_stops_count;
-        double route_length;
-        double curvature;
-    };
-}
 
 
 namespace infocatalogueclass {
     class TransportCatalogue {
     public:
-        void AddBusRoute(const infostruct::Bus&);
-        void AddBusStop(const infostruct::Stop&);
-        const infostruct::Bus* FindBusRoute(const std::string&) const;
-        infostruct::Stop* FindBusStop(const std::string&) const;
-        const infostruct::RouteInfo BusRouteInformation(const std::string&) const;
+
+        
+        struct StopsHasher {
+            size_t operator()(const std::pair<const domain::Stop*, const domain::Stop*>& points) const {
+                size_t hash_first = std::hash<const void*>{}(points.first);
+                size_t hash_second = std::hash<const void*>{}(points.second);
+                return hash_first + hash_second * 37;
+            }
+        };
+
+        void AddBusRoute(const domain::Bus&);
+        void AddBusStop(const domain::Stop&);
+        const domain::Bus* FindBusRoute(const std::string&) const;
+        domain::Stop* FindBusStop(const std::string&) const;
+        const domain::RouteInfo BusRouteInformation(const std::string&) const;
         size_t UniqueStopsCount(const std::string&) const;
         std::set<std::string>BusToStop(const std::string&) const;
-        void SetStopDistance(infostruct::Stop*, infostruct::Stop*, int);
-        int GetStopDistance(const infostruct::Stop*, const infostruct::Stop*) const;
+        void SetStopDistance(domain::Stop*, domain::Stop*, int);
+        int GetStopDistance(const domain::Stop*, const domain::Stop*) const;
+
+        
 
     private:
-        std::deque<infostruct::Bus> buses_;
-        std::deque<infostruct::Stop> stops_;
-        std::unordered_map<std::string_view, const infostruct::Bus*> finderbus_;
-        std::unordered_map<std::string_view, infostruct::Stop*> finderstop_;
+        std::deque<domain::Bus> buses_;
+        std::deque<domain::Stop> stops_;
+        std::unordered_map<std::string_view, const domain::Bus*> finderbus_;
+        std::unordered_map<std::string_view, domain::Stop*> finderstop_;
         std::unordered_map<std::string, std::set<std::string>> bustoforstop_;
+        std::unordered_map<std::pair<const domain::Stop*, const domain::Stop*>, int, StopsHasher> stop_distances;
+
+
+        
+
     };
 }
