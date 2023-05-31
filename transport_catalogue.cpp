@@ -1,105 +1,54 @@
-#include "transport_catalogue.h"
+#pragma once
 
-void infocatalogueclass::TransportCatalogue::AddBusRoute(const infostruct::Bus& businfo) {
-    buses_.push_back(businfo);
-    finderbus_[buses_.back().number] = &buses_.back();
+#include "geo.h"
 
-    for (const auto& inf : buses_.back().stops) {
-        bustoforstop_[inf].insert(businfo.number);
-    }
-}
-
-void infocatalogueclass::TransportCatalogue::AddBusStop(const infostruct::Stop& stopinfo) {
-    stops_.push_back(stopinfo);
-    finderstop_[stops_.back().name] = &stops_.back();
-}
-
-const infostruct::Bus* infocatalogueclass::TransportCatalogue::FindBusRoute(const std::string& route_number) const {
-    if (finderbus_.count(route_number)) {
-        return finderbus_.at(route_number);
-    }
-    else
-        return nullptr;
-}
-
-infostruct::Stop* infocatalogueclass::TransportCatalogue::FindBusStop(const std::string& stop_name) const {
-    if (finderstop_.count(stop_name)) {
-        return finderstop_.at(stop_name);
-    }
-    else
-        return nullptr;
-}
-
-const infostruct::RouteInfo infocatalogueclass::TransportCatalogue::BusRouteInformation(const std::string& route_number) const {
-
-    infostruct::RouteInfo info{};
-    auto find_ = finderbus_.find(route_number);
-
-    auto bus = FindBusRoute(route_number);
-    if (!bus){ 
-        std::cout << "notFound"; return { 0,0,0 }; 
-    }
-
-    if (bus->circular_route) {
-        info.stops_count = bus->stops.size();
-    }
-    else {
-        info.stops_count = bus->stops.size() * 2 - 1;
-    }
-
-    double length = 0.0; 
-    double geo_length = 0.0;
+#include <deque>
+#include <string>
+#include <iostream>
+#include <unordered_map>
+#include <vector>
+#include <stdexcept>
+#include <set>
+#include <map>
+#include <unordered_set>
+#include <functional>
+#include "domain.h"
+#include "geo.h"
 
 
-    for (size_t i = 1; i < bus->stops.size(); ++i) {
 
-        geo_length += coordinate::ComputeDistance(finderstop_.at(find_->second->stops[i - 1])->coordinates, finderstop_.at(find_->second->stops[i])->coordinates);
-        if (bus->circular_route != true) {
-            length += GetStopDistance(finderstop_.at(find_->second->stops[i - 1]), finderstop_.at(find_->second->stops[i])) +
-                GetStopDistance(finderstop_.at(find_->second->stops[i]), finderstop_.at(find_->second->stops[i - 1]));
-        }
-        else {
-            length+= GetStopDistance(finderstop_.at(find_->second->stops[i - 1]), finderstop_.at(find_->second->stops[i]));
-        }
+
+namespace infocatalogueclass {
+    class TransportCatalogue {
+    public:
+
         
-    }
-    if (bus->circular_route != true) {
-        geo_length *= 2;
-    }
+        struct StopsHasher {
+            size_t operator()(const std::pair<const domain::Stop*, const domain::Stop*>& points) const {
+                size_t hash_first = std::hash<const void*>{}(points.first);
+                size_t hash_second = std::hash<const void*>{}(points.second);
+                return hash_first + hash_second * 37;
+            }
+        };
 
-    info.unique_stops_count = UniqueStopsCount(route_number);
-    info.route_length = length;
-    info.curvature = length/geo_length;
-    return info;
-}
+        void AddBusRoute(const domain::Bus&);
+        void AddBusStop(const domain::Stop&);
+        const domain::Bus* FindBusRoute(const std::string&) const;
+        domain::Stop* FindBusStop(const std::string&) const;
+        const domain::RouteInfo BusRouteInformation(const std::string&) const;
+        size_t UniqueStopsCount(const std::string&) const;
+        std::set<std::string>BusToStop(const std::string&) const;
+        void SetStopDistance(domain::Stop*, domain::Stop*, int);
+        int GetStopDistance(const domain::Stop*, const domain::Stop*) const;
 
-size_t infocatalogueclass::TransportCatalogue::UniqueStopsCount(const std::string& route_number) const {
-    std::unordered_set<std::string>unique;
-    for (const auto& stop : finderbus_.at(route_number)->stops) {
-        unique.insert(stop);
-    }
-    return unique.size();
-}
+        
 
-std::set<std::string>infocatalogueclass::TransportCatalogue::BusToStop(const std::string& stop_name) const {
-    if (bustoforstop_.count(stop_name)) {
-        return bustoforstop_.at(stop_name);
-    }
-    return {};
-}
-
-void infocatalogueclass::TransportCatalogue::SetStopDistance(infostruct::Stop* from, infostruct::Stop* to, int dist){
-    from->stop_distances[to->name] = dist;
-}
-
-int infocatalogueclass::TransportCatalogue::GetStopDistance(const infostruct::Stop* f, const infostruct::Stop* t) const{
-    if (f->stop_distances.count(t->name)) {
-        return f->stop_distances.at(t->name);
-    }   
-    else if (t->stop_distances.count(f->name)) {
-        return t->stop_distances.at(f->name);
-    }
-    else {
-        return 0;
-    }     
+    private:
+        std::deque<domain::Bus> buses_;
+        std::deque<domain::Stop> stops_;
+        std::unordered_map<std::string_view, const domain::Bus*> finderbus_;
+        std::unordered_map<std::string_view, domain::Stop*> finderstop_;
+        std::unordered_map<std::string, std::set<std::string>> bustoforstop_;
+        std::unordered_map<std::pair<const domain::Stop*, const domain::Stop*>, int, StopsHasher> stop_distances;
+    };
 }
