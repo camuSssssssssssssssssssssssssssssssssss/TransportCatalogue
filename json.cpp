@@ -6,7 +6,7 @@ namespace json {
 
         Node LoadNode(istream& input);
 
-        //строка с литералами
+
         std::string LoadLiteral(std::istream& input) {
             std::string str;
 
@@ -16,7 +16,6 @@ namespace json {
             return str;
         }
 
-        //массив
         Node LoadArray(std::istream& input) {
             std::vector<Node> array;
 
@@ -370,29 +369,14 @@ namespace json {
         }
     }
 
-    Document::Document(Node root) : root_(std::move(root)) {}
-    const Node& Document::GetRoot() const { return root_; }
-    Document Load(istream& input) { return Document{ LoadNode(input) }; }
-
-    struct PrintContext {
-        std::ostream& out;
-        int indent_step = 4;
-        int indent = 0;
-
-        void PrintIndent() const {
-            for (int i = 0; i < indent; ++i) {
-                out.put(' ');
-            }
-        }
-
-        [[nodiscard]] PrintContext Indented() const {
-            return { out,
-                    indent_step,
-                    indent + indent_step };
-        }
-    };
-
-    void PrintNode(const Node& node, const PrintContext& context);
+    Document::Document(Node root) : root_(std::move(root)) {
+    }
+    const Node& Document::GetRoot() const {
+        return root_;
+    }
+    Document Load(istream& input) {
+        return Document{ LoadNode(input) };
+    }
 
 
     void PrintString(const std::string& value, std::ostream& out) {
@@ -426,10 +410,10 @@ namespace json {
         context.out << value;
     }
 
-    template <>
-    void PrintValue<std::string>(const std::string& value, const PrintContext& context) {
+    void PrintValue(const std::string& value, const PrintContext& context) {
         PrintString(value, context.out);
     }
+
 
     void PrintValue(const std::nullptr_t&, const PrintContext& context) {
         context.out << "null"s;
@@ -461,6 +445,7 @@ namespace json {
         context.PrintIndent();
         out.put(']');
     }
+
 
     void PrintValue(Dict nodes, const PrintContext& context) {
         std::ostream& out = context.out;
