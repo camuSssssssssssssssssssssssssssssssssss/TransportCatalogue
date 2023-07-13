@@ -1,9 +1,18 @@
-#include "input_reader.h"
-#include "stat_reader.h"
+#include "json_reader.h"
+#include "request_handler.h"
 
-// main.cpp — точка входа.
 int main() {
-    infocatalogueclass::TransportCatalogue catalogue;
-    fill::TransportCatalogue(std::cin, catalogue);
-    out::Transport(catalogue, std::cin);
+    infocatalogue::TransportCatalogue catalogue;
+    JSONReader json_doc(std::cin);
+
+    json_doc.FillCatalogue(catalogue);
+
+    const auto& stat_requests = json_doc.StatRequests();
+    const auto& render_settings = json_doc.RenderSettings();
+    const auto& renderer = json_doc.FillRenderSettings(render_settings);
+    const auto& routing_settings = json_doc.FillRoutingSettings(json_doc.RoutingSettings());
+    const transport_router::Router router = { routing_settings, catalogue };
+
+    RequestHandler rh(catalogue, renderer, router);
+    rh.ProcessRequests(stat_requests);
 }
