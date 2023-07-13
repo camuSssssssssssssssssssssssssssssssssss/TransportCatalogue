@@ -9,11 +9,10 @@
 namespace json {
 
     class Node;
-    // Сохраните объявления Dict и Array без изменения
+
     using Dict = std::map<std::string, Node>;
     using Array = std::vector<Node>;
 
-    // Эта ошибка должна выбрасываться при ошибках парсинга JSON
     class ParsingError : public std::runtime_error {
     public:
         using runtime_error::runtime_error;
@@ -23,7 +22,6 @@ namespace json {
     public:
 
         using Value = std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string>;
-        /* Реализуйте Node, используя std::variant */
 
         Node() = default;
         Node(Array);
@@ -36,8 +34,8 @@ namespace json {
 
 
         bool IsInt() const;
-        bool IsDouble() const;              //Возвращает true, если в Node хранится int либо double.
-        bool IsPureDouble() const;          //Возвращает true, если в Node хранится double.
+        bool IsDouble() const;
+        bool IsPureDouble() const;
         bool IsBool() const;
         bool IsString() const;
         bool IsNull() const;
@@ -85,6 +83,32 @@ namespace json {
         return !(lhs == rhs);
     }
 
+    struct PrintContext {
+        std::ostream& out;
+        int indent_step = 4;
+        int indent = 0;
+
+        void PrintIndent() const {
+            for (int i = 0; i < indent; ++i) {
+                out.put(' ');
+            }
+        }
+
+        [[nodiscard]] PrintContext Indented() const {
+            return { out, indent_step,
+                    indent + indent_step };
+        }
+    };
+
+    void PrintNode(const Node& node, const PrintContext& context);
+    void PrintValue(const std::string& value, const PrintContext& context);
+    void PrintValue(Dict nodes, const PrintContext& context);
+    void PrintValue(const std::nullptr_t&, const PrintContext& context);
+    void PrintValue(Array nodes, const PrintContext& context);
+    void PrintValue(bool value, const PrintContext& context);
+    template <typename Value>
+    void PrintValue(const Value& value, const PrintContext& context);
+
     void Print(const Document& doc, std::ostream& output);
 
-}  // namespace json
+}
